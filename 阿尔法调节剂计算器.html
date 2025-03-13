@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿尔法农服葡萄调节剂智能计算器</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .scheme-image {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .image-caption {
+            color: #666;
+            font-size: 0.9em;
+            text-align: center;
+            margin: 0.5rem 0 1.5rem;
+        }
+        .chemical-grid { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .total-section { 
+            background: #f8fff9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .stage-card { 
+            border-left: 3px solid #4CAF50;
+            margin: 1.5rem 0;
+            padding-left: 1rem;
+        }
+        .water-usage { 
+            color: #2c7a47;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .hidden { display: none; }
+        #backBtn { margin-top: 1rem; }
+        .scheme-desc { color: #666; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="text-center mb-4">🍇 阿尔法农服葡萄调节剂智能计算器</h1>
+
+        <!-- 方案选择 -->
+        <div class="btn-group w-100 mb-4">
+            <button class="btn btn-outline-success active" id="scheme1Btn">方案一</button>
+            <button class="btn btn-outline-success" id="scheme2Btn">方案二</button>
+        </div>
+
+        <!-- 方案说明 -->
+        <div id="schemeDescription">
+            <div class="card mb-4">
+                <div class="card-body" id="originalScheme"></div>
+            </div>
+        </div>
+
+        <!-- 计算输入区 -->
+        <div class="calculator-card card mb-4">
+            <div class="card-body">
+                <div class="input-group">
+                    <input type="number" id="mu" class="form-control" placeholder="请输入种植亩数" step="0.1" min="0">
+                    <button class="btn btn-success" onclick="calculate()">开始计算</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 计算结果区 -->
+        <div id="calculationResults" class="hidden">
+            <button id="backBtn" class="btn btn-outline-secondary" onclick="showOriginal()">返回方案说明</button>
+        </div>
+    </div>
+
+<script>
+const schemes = {
+    1: {
+        name: "方案一：花前保果+花后保果+膨果处理",
+        desc: "特点：皮薄，肉脆，肉质白，颜色偏黄亮，果粒15-20g，有香味，不易空心",
+        image: "https://img.picui.cn/free/2025/03/13/67d249a08390d.jpeg",
+        steps: [
+            {
+                name: "花前保果",
+                waterPerMu: 12,
+                formula: [
+                    { name: "0.1%氯吡脲", amount: 30, unit: "ml", conc: "2ppm", perWater: 30 },
+                    { name: "链霉素", amount: 3, unit: "支", perWater: 30 }
+                ]
+            },
+            {
+                name: "花后保果",
+                waterPerMu: 12,
+                formula: [
+                    { name: "奇宝20%赤霉酸", amount: 1, unit: "克", conc: "12.5ppm", perWater: 32 },
+                    { name: "0.1%氯吡脲", amount: 80, unit: "ml", conc: "5ppm", perWater: 32 },
+                    { name: "益果灵0.1%噻苯隆", amount: 13, unit: "ml", conc: "0.8ppm", perWater: 32 },
+                    { name: "链霉素", amount: 3, unit: "支", perWater: 32 }
+                ]
+            },
+            {
+                name: "膨果处理",
+                waterPerMu: 40,
+                formula: [
+                    { name: "0.1%氯吡脲", amount: 90, unit: "ml", conc: "6ppm", perWater: 30 },
+                    { name: "保美灵3.6%苄氨基嘌呤·赤霉酸", amount: 4, unit: "ml", perWater: 30 },
+                    { name: "链霉素", amount: 3, unit: "支", perWater: 30 },
+                    { name: "海勇士", amount: 80, unit: "ml", perWater: 30 },
+                    { name: "奇宝20%赤霉酸", amount: 2, unit: "克", conc: "25ppm", perWater: 30 },
+                    { name: "金满粒0.01%芸苔素内脂", amount: 15, unit: "ml", perWater: 30 }
+                ]
+            }
+        ]
+    },
+    2: {
+        name: "方案二：花后保果+膨果处理",
+        desc: "特点：果粒更大，皮厚度适中，颜色黄绿，香味淡",
+        image: "https://img.picui.cn/free/2025/03/13/67d24a3b0a176.jpeg",
+        steps: [
+            {
+                name: "花后保果",
+                waterPerMu: 12,
+                formula: [
+                    { name: "奇宝20%赤霉酸", amount: 1, unit: "克", conc: "12.5ppm", perWater: 32 },
+                    { name: "0.1%氯吡脲", amount: 40, unit: "ml", conc: "2.5ppm", perWater: 32 },
+                    { name: "0.1%噻苯隆", amount: 25, unit: "ml", conc: "1.5ppm", perWater: 32 },
+                    { name: "海勇士", amount: 60, unit: "ml", perWater: 32 },
+                    { name: "保美灵3.6%苄氨基嘌呤·赤霉酸", amount: 2, unit: "ml", perWater: 32 },
+                    { name: "适乐时20%咯菌腈", amount: 20, unit: "ml", perWater: 32 },
+                    { name: "必加", amount: 8, unit: "ml", perWater: 32 }
+                ]
+            },
+            {
+                name: "膨果处理",
+                waterPerMu: 40,
+                formula: [
+                    { name: "奇宝20%赤霉酸", amount: 2, unit: "克", conc: "25ppm", perWater: 35 },
+                    { name: "0.1%氯吡脲", amount: 90, unit: "ml", conc: "5ppm", perWater: 35 },
+                    { name: "海勇士", amount: 60, unit: "ml", perWater: 35 },
+                    { name: "保美灵3.6%苄氨基嘌呤·赤霉酸", amount: 4, unit: "ml", perWater: 35 },
+                    { name: "0.1%噻苯隆", amount: 10, unit: "ml", conc: "0.5ppm", perWater: 35 },
+                    { name: "金满粒0.01%芸苔素内脂", amount: 20, unit: "ml", perWater: 35 },
+                    { name: "阿法克灰30%抑霉唑咯菌腈", amount: 10, unit: "克", perWater: 35 }
+                ]
+            }
+        ]
+    }
+};
+
+let currentScheme = 1;
+
+// 初始化显示
+updateSchemeDisplay();
+
+// 方案切换事件
+document.querySelectorAll('#scheme1Btn, #scheme2Btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentScheme = this.id === 'scheme1Btn' ? 1 : 2;
+        document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        updateSchemeDisplay();
+    });
+});
+
+function updateSchemeDisplay() {
+    const scheme = schemes[currentScheme];
+    let html = `
+        <div class="image-container">
+            <img src="${scheme.image}" 
+                 class="scheme-image"
+                 alt="${scheme.name}"
+                 onerror="this.style.display='none'">
+            <div class="image-caption">${scheme.name}效果示意图</div>
+        </div>
+        <h4 class="text-success mb-3">${scheme.name}</h4>
+        <div class="scheme-desc">${scheme.desc}</div>
+    `;
+    
+    scheme.steps.forEach((step, index) => {
+        html += `<div class="stage-card">
+            <h5>${index + 1}. ${step.name}</h5>
+            <div class="chemical-grid-header chemical-grid">
+                <div>药剂名称</div>
+                <div>用量/兑水量</div>
+                <div>浓度</div>
+            </div>`;
+        
+        step.formula.forEach(chem => {
+            html += `<div class="chemical-grid">
+                <div class="product-name">${chem.name}</div>
+                <div>${chem.amount}${chem.unit} / ${chem.perWater}斤</div>
+                <div>${chem.conc || '-'}</div>
+            </div>`;
+        });
+        html += `</div>`;
+    });
+    
+    document.getElementById('originalScheme').innerHTML = html;
+}
+
+// 保持原有计算函数不变
+function calculate() {
+    const mu = parseFloat(document.getElementById('mu').value);
+    if (!mu || mu <= 0) return alert("请输入有效亩数");
+
+    document.getElementById('schemeDescription').classList.add('hidden');
+    document.getElementById('calculationResults').classList.remove('hidden');
+
+    const scheme = schemes[currentScheme];
+    let total = {};
+    let resultsHTML = '';
+
+    scheme.steps.forEach(step => {
+        const totalWater = (step.waterPerMu * mu).toFixed(1);
+        resultsHTML += `<div class="stage-card">
+            <h4 class="water-usage">${step.name} - 总需水量：${totalWater}斤</h4>
+            <div class="chemical-grid-header chemical-grid">
+                <div>药剂名称</div>
+                <div>总用量</div>
+                <div>每亩用量</div>
+            </div>`;
+
+        step.formula.forEach(chem => {
+            const perMu = (chem.amount / chem.perWater * step.waterPerMu).toFixed(2);
+            const totalAmount = (perMu * mu).toFixed(2);
+            
+            resultsHTML += `<div class="chemical-grid">
+                <div class="product-name">${chem.name}</div>
+                <div><strong>${totalAmount}</strong> ${chem.unit}</div>
+                <div>${perMu} ${chem.unit}/亩</div>
+            </div>`;
+
+            const key = `${chem.name}|${chem.unit}`;
+            total[key] = (total[key] || 0) + parseFloat(totalAmount);
+        });
+
+        resultsHTML += `</div>`;
+    });
+
+    let totalHTML = `<div class="total-section">
+        <h4 class="text-success mb-3">总计用量</h4>
+        <div class="chemical-grid-header chemical-grid">
+            <div>药剂名称</div>
+            <div>总用量</div>
+            <div>单位</div>
+        </div>`;
+    
+    for (const [key, value] of Object.entries(total)) {
+        const [name, unit] = key.split("|");
+        totalHTML += `<div class="chemical-grid">
+            <div class="product-name">${name}</div>
+            <div><strong>${value.toFixed(2)}</strong></div>
+            <div>${unit}</div>
+        </div>`;
+    }
+    totalHTML += `</div>`;
+
+    document.getElementById('calculationResults').innerHTML = `<button id="backBtn" class="btn btn-outline-secondary" onclick="showOriginal()">返回方案说明</button>` + resultsHTML + totalHTML;
+}
+
+function showOriginal() {
+    document.getElementById('schemeDescription').classList.remove('hidden');
+    document.getElementById('calculationResults').classList.add('hidden');
+}
+</script>
+</body>
+</html>
