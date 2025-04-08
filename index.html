@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>阿尔法农服阳光玫瑰调节剂用量计算器</title>
+    <title>阳光玫瑰调节剂使用计算器</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .scheme-image {
@@ -51,22 +51,19 @@
 </head>
 <body>
     <div class="container py-4">
-        <h1 class="text-center mb-4">🍇 阿尔法农服阳光玫瑰调节剂用量计算器</h1>
+        <h1 class="text-center mb-4">🍇 阳光玫瑰调节剂使用计算器</h1>
 
-        <!-- 方案选择 -->
         <div class="btn-group w-100 mb-4">
             <button class="btn btn-outline-success active" id="scheme1Btn">方案一</button>
             <button class="btn btn-outline-success" id="scheme2Btn">方案二</button>
         </div>
 
-        <!-- 方案说明 -->
         <div id="schemeDescription">
             <div class="card mb-4">
                 <div class="card-body" id="originalScheme"></div>
             </div>
         </div>
 
-        <!-- 计算输入区 -->
         <div class="calculator-card card mb-4">
             <div class="card-body">
                 <div class="input-group">
@@ -76,7 +73,6 @@
             </div>
         </div>
 
-        <!-- 计算结果区 -->
         <div id="calculationResults" class="hidden">
             <button id="backBtn" class="btn btn-outline-secondary" onclick="showOriginal()">返回方案说明</button>
         </div>
@@ -113,7 +109,6 @@ const schemes = {
                 formula: [
                     { name: "0.1%氯吡脲", amount: 90, unit: "ml", conc: "6ppm", perWater: 30 },
                     { name: "保美灵3.6%苄氨基嘌呤·赤霉酸", amount: 4, unit: "ml", perWater: 30 },
-                    { name: "链霉素", amount: 3, unit: "支", perWater: 30 },
                     { name: "海勇士", amount: 80, unit: "ml", perWater: 30 },
                     { name: "奇宝20%赤霉酸", amount: 2, unit: "克", conc: "25ppm", perWater: 30 },
                     { name: "金满粒0.01%芸苔素内脂", amount: 15, unit: "ml", perWater: 30 }
@@ -161,7 +156,6 @@ let currentScheme = 1;
 // 初始化显示
 updateSchemeDisplay();
 
-// 方案切换事件
 document.querySelectorAll('#scheme1Btn, #scheme2Btn').forEach(btn => {
     btn.addEventListener('click', function() {
         currentScheme = this.id === 'scheme1Btn' ? 1 : 2;
@@ -207,7 +201,6 @@ function updateSchemeDisplay() {
     document.getElementById('originalScheme').innerHTML = html;
 }
 
-// 保持原有计算函数不变
 function calculate() {
     const mu = parseFloat(document.getElementById('mu').value);
     if (!mu || mu <= 0) return alert("请输入有效亩数");
